@@ -8,13 +8,13 @@ export const styles = StyleSheet.create({
   },
 
   text: {
-    fontSize: 70,
+    fontSize: 60,
     fontWeight: 'bold'
   },
 
   image: {
-    width: 400,
-    height: 400,
+    width: 350,
+    height: 350,
     marginTop: 20
   },
 
