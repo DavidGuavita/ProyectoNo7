@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  // INDEX
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -29,6 +30,27 @@ export const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 36,
+    fontWeight: 'bold'
+  },
+
+  // SCREEN2
+  mapContainer: {
+    flex: 1
+  },
+
+  map: {
+    flex: 1
+  },
+
+  mapButton: {
+    backgroundColor: '#007BFF',
+    padding: 20,
+    alignItems: 'center'
+  },
+
+  mapButtonText: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold'
   }
 });
