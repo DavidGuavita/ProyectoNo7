@@ -1,5 +1,6 @@
 import * as Location from 'expo-location';
-import React, { useEffect, useRef, useState } from 'react'; // Se añade useRef
+import { useRouter } from 'expo-router'; // 1. Importar el hook de navegación
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { LatLng, Marker, Polygon, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -8,9 +9,8 @@ import paradasSITP from '../data/geojson/sitp_paraderos.json';
 import { styles } from './styles/styles';
 
 export default function Screen2() {
+  const router = useRouter(); // 2. Inicializar el router
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
-  
-  // 1. Referencia para controlar el mapa
   const mapRef = useRef<MapView>(null);
 
   const bogotaRegion = {
@@ -31,14 +31,13 @@ export default function Screen2() {
       let location = await Location.getCurrentPositionAsync({});
       setUserLocation(location);
 
-      // 2. Centrar la cámara en la ubicación del usuario con una animación suave
       if (mapRef.current) {
         mapRef.current.animateToRegion({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.005, // Zoom más cercano para ver paraderos
+          latitudeDelta: 0.005,
           longitudeDelta: 0.005,
-        }, 1000); // 1 segundo de duración
+        }, 1000);
       }
     })();
   }, []);
@@ -46,7 +45,7 @@ export default function Screen2() {
   return (
     <View style={styles.mapContainer}>
       <MapView
-        ref={mapRef} // 3. Vinculamos la referencia
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={bogotaRegion}
@@ -54,7 +53,7 @@ export default function Screen2() {
         showsMyLocationButton={true}
       >
         
-        {/* --- 1. POLÍGONOS CON TYPESCRIPT CORREGIDO --- */}
+        {/* --- 1. POLÍGONOS --- */}
         {cobertura?.features?.map((feature: any, fIndex: number) => {
           const geometry = feature.geometry;
           if (!geometry || !geometry.coordinates) return null;
@@ -65,7 +64,6 @@ export default function Screen2() {
             if (!Array.isArray(polygon[0])) return null;
 
             const coords: LatLng[] = [];
-            
             polygon[0].forEach((coord: any) => {
               if (Array.isArray(coord) && coord.length >= 2) {
                 coords.push({
@@ -90,7 +88,7 @@ export default function Screen2() {
           });
         })}
 
-        {/* --- 2. PARADEROS CON VALIDACIÓN --- */}
+        {/* --- 2. PARADEROS --- */}
         {paradasSITP?.features?.map((parada: any, index: number) => {
           if (
             parada.geometry && 
@@ -106,7 +104,7 @@ export default function Screen2() {
                 title={parada.properties?.nombre || "Paradero"}
                 pinColor="green"
                 zIndex={2}
-                tracksViewChanges={false} // Mejora el rendimiento al no re-renderizar iconos estáticos
+                tracksViewChanges={false}
               />
             );
           }
@@ -115,7 +113,11 @@ export default function Screen2() {
 
       </MapView>
 
-      <TouchableOpacity style={styles.mapButton}>
+      {/* 3. Botón configurado para navegar a Screen3 */}
+      <TouchableOpacity 
+        style={styles.mapButton}
+        onPress={() => router.push('/Screen3')}
+      >
         <Text style={styles.mapButtonText}>Conseguir ruta</Text>
       </TouchableOpacity>
     </View>
