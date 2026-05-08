@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react'; // Se añade useRef
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { LatLng, Marker, Polygon, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -9,6 +9,9 @@ import { styles } from './styles/styles';
 
 export default function Screen2() {
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  
+  // 1. Referencia para controlar el mapa
+  const mapRef = useRef<MapView>(null);
 
   const bogotaRegion = {
     latitude: 4.60971,
@@ -24,14 +27,26 @@ export default function Screen2() {
         Alert.alert("Permiso denegado", "No podemos acceder a tu ubicación actual.");
         return;
       }
+      
       let location = await Location.getCurrentPositionAsync({});
       setUserLocation(location);
+
+      // 2. Centrar la cámara en la ubicación del usuario con una animación suave
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.005, // Zoom más cercano para ver paraderos
+          longitudeDelta: 0.005,
+        }, 1000); // 1 segundo de duración
+      }
     })();
   }, []);
 
   return (
     <View style={styles.mapContainer}>
       <MapView
+        ref={mapRef} // 3. Vinculamos la referencia
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={bogotaRegion}
@@ -49,7 +64,6 @@ export default function Screen2() {
           return polygons.map((polygon: any, pIndex: number) => {
             if (!Array.isArray(polygon[0])) return null;
 
-            // Procesamos las coordenadas asegurando que el resultado sea LatLng[]
             const coords: LatLng[] = [];
             
             polygon[0].forEach((coord: any) => {
@@ -92,7 +106,7 @@ export default function Screen2() {
                 title={parada.properties?.nombre || "Paradero"}
                 pinColor="green"
                 zIndex={2}
-                tracksViewChanges={false}
+                tracksViewChanges={false} // Mejora el rendimiento al no re-renderizar iconos estáticos
               />
             );
           }
